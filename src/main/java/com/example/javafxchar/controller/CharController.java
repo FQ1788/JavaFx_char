@@ -2,13 +2,12 @@ package com.example.javafxchar.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 
 import java.util.Map;
 
 public class CharController {
-    private boolean shiftOn = false;
-
     @FXML
     private VBox msgLayout;
 
@@ -27,18 +26,12 @@ public class CharController {
     public void initialize() {
         msgLayout.heightProperty().addListener(i -> scrollPane.setVvalue(1.0));
         messageArea.setOnKeyPressed(event -> {
-            switch (event.getCode()){
-                case SHIFT -> shiftOn = true;
-                case ENTER -> {
-                    if (shiftOn) {
-                        messageArea.setText(messageArea.getText() + "\n");
-                        messageArea.end();
-                    } else {
-                        sendMessage();
-                    }
-                    shiftOn = false;
+            if (KeyCode.ENTER.equals(event.getCode())) {
+                if (event.isShiftDown()) {
+                    messageArea.appendText("\n");
+                } else {
+                    sendMessage();
                 }
-                default -> shiftOn = false;
             }
         });
     }
