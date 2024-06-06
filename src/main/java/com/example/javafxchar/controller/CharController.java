@@ -7,6 +7,7 @@ import javafx.scene.layout.VBox;
 import java.util.Map;
 
 public class CharController {
+    private boolean shiftOn = false;
 
     @FXML
     private VBox msgLayout;
@@ -24,8 +25,21 @@ public class CharController {
 
     @FXML
     public void initialize() {
-        msgLayout.heightProperty().addListener(i->{
-            scrollPane.setVvalue(1.0);
+        msgLayout.heightProperty().addListener(i -> scrollPane.setVvalue(1.0));
+        messageArea.setOnKeyPressed(event -> {
+            switch (event.getCode()){
+                case SHIFT -> shiftOn = true;
+                case ENTER -> {
+                    if (shiftOn) {
+                        messageArea.setText(messageArea.getText() + "\n");
+                        messageArea.end();
+                    } else {
+                        sendMessage();
+                    }
+                    shiftOn = false;
+                }
+                default -> shiftOn = false;
+            }
         });
     }
 
@@ -34,11 +48,9 @@ public class CharController {
      */
     public void connectionChar() {
         checkAndClose();
-        stompController = new StompController("ws://172.20.96.1:8033/ws");
+        stompController = new StompController("ws://172.20.27.74:8033/ws");
         stompController.connection();
-        stompController.subMessage("/chat/out", Map.class, i -> {
-            msgLayout.getChildren().add(new Label(i.get("content").toString()));
-        });
+        stompController.subMessage("/chat/out", Map.class, i -> msgLayout.getChildren().add(new Label(i.get("content").toString())));
         tabPane.getSelectionModel().select(1);
     }
 
